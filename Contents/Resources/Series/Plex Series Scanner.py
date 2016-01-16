@@ -6,8 +6,8 @@ import Media, VideoFiles, Stack, Utils
 from mp4file import mp4file, atomsearch
 
 episode_regexps = [
-    '(?P<show>.*?)[sS](?P<season>[0-9]+)[\._ ]*[eE](?P<ep>[0-9]+)[\._ ]*([- ]?[sS](?P<secondSeason>[0-9]+))?([- ]?[Ee+](?P<secondEp>[0-9]+))?', # S03E04-E05
-    '(?P<show>.*?)[sS](?P<season>[0-9]{2})[\._\- ]+(?P<ep>[0-9]+)',                                                            # S03-03
+    '(?P<show>.*?)[sS](eason\s*)?(?P<season>[0-9]+)[\._ ]*[eE](pisode\s*)?(?P<ep>[0-9]+)[\._ ]*([- ]?[sS](eason\s*)?(?P<secondSeason>[0-9]+))?([- ]?[Ee+](?P<secondEp>[0-9]+))?', # S03E04-E05
+    '(?P<show>.*?)[sS](eason\s*)?(?P<season>[0-9]{2})[\._\- ]+(?P<ep>[0-9]+)',                                                            # S03-03
     '(?P<show>.*?)([^0-9]|^)(?P<season>(19[3-9][0-9]|20[0-5][0-9]|[0-9]{1,2}))[Xx](?P<ep>[0-9]+)((-[0-9]+)?[Xx](?P<secondEp>[0-9]+))?',  # 3x03, 3x03-3x04, 3x03x04
     '(.*?)(^|[\._\- ])+(?P<season>sp)(?P<ep>[0-9]{2})([\._\- ]|$)+',  # SP01 (Special 01, equivalent to S00E01)
     '(.*?)[^0-9a-z](?P<season>[0-9]{1,2})(?P<ep>[0-9]{2})([\.\-][0-9]+(?P<secondEp>[0-9]{2})([ \-_\.]|$)[\.\-]?)?([^0-9a-z%]|$)' # .602.
@@ -27,7 +27,7 @@ season_regex = '.*?(?P<season>[0-9]+)$' # folder for a season
 
 just_episode_regexs = [
     '(?P<ep>[0-9]{1,3})[\. -_]*of[\. -_]*[0-9]{1,3}',       # 01 of 08
-    '^(?P<ep>[0-9]{1,3})[^0-9]',                           # 01 - Foo
+    '^([eE](pisode)?\s*)?(?P<ep>[0-9]{1,3})[^0-9]',                           # 01 - Foo
     'e[a-z]*[ \.\-_]*(?P<ep>[0-9]{2,3})([^0-9c-uw-z%]|$)', # Blah Blah ep234
     '.*?[ \.\-_](?P<ep>[0-9]{2,3})[^0-9c-uw-z%]+',         # Flah - 04 - Blah
     '.*?[ \.\-_](?P<ep>[0-9]{2,3})$',                      # Flah - 04
