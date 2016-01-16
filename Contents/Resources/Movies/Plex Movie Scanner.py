@@ -1,7 +1,7 @@
 #
 # Copyright (c) 2010 Plex Development Team. All rights reserved.
 #
-import re, os, os.path
+import sys, re, os, os.path
 import Media, VideoFiles, Stack, Utils
 SeriesScanner = __import__('Plex Series Scanner')
 
@@ -44,7 +44,7 @@ def Scan(path, files, mediaList, subdirs, language=None, root=None, **kwargs):
     movie = Media.Movie(name, year)
     
     # Add the video_ts file first.
-    movie.parts.append(video_ts)
+    # movie.parts.append(video_ts)
 
     biggestFile = None
     biggestSize = 0
@@ -53,10 +53,22 @@ def Scan(path, files, mediaList, subdirs, language=None, root=None, **kwargs):
       if os.path.splitext(i)[1].lower() == '.vob' and os.path.getsize(i) > biggestSize:
         biggestSize = os.path.getsize(i)
         biggestFile = i
-       
+
+ 
     # Add the biggest part so that we can get thumbnail/art/analysis from it. 
+    vts = []
+    (xp, xname) = os.path.split(biggestFile)
+    idx = xname.rfind('_')
     if biggestFile is not None:
-      movie.parts.append(biggestFile)
+       for i in files:
+          (fp, fname) = os.path.split(i)
+          if fname.rfind('_') == idx:
+             if fname[:idx] == xname[:idx]:
+                vts.append((i, fname[idx+1:-4]))
+    vts = sorted(vts, key=lambda x: x[1]);
+
+    for (i, order) in vts:
+      movie.parts.append(i)
         
     if len(movie.parts) > 0:
       movie.guid = checkNfoFile(movie.parts[0], 1)
@@ -66,7 +78,8 @@ def Scan(path, files, mediaList, subdirs, language=None, root=None, **kwargs):
   elif len(paths) >= 3 and paths[-1].lower() == 'stream' and paths[-2].lower() == 'bdmv':
     (name, year) = VideoFiles.CleanName(paths[-3])
     movie = Media.Movie(name, year)
-    for i in files:
+    files = sorted(files, key=os.path.getsize)
+    for i in files[-1:]:
       movie.parts.append(i)
     mediaList.append(movie)
     
@@ -144,6 +157,13 @@ def Scan(path, files, mediaList, subdirs, language=None, root=None, **kwargs):
          
   # Finally, if any of the subdirectories match a TV show, don't enter!
   whack = []
+  if 'video_ts' in [Utils.SplitPath(s)[-1].lower() for s in subdirs]:
+    for dir in subdirs:
+      d = os.path.basename(dir).lower()
+      if d not in ['video_ts', 'audio_ts']:
+        whack.append(dir)
+  
+  # Finally, if any of the subdirectories match a TV show, don't enter!
   for dir in subdirs:
     for rx in standalone_tv_regexs:
       res = re.findall(rx, dir)
@@ -177,3 +197,11 @@ def checkNfoFile(file, fileCount):
     print "Warning, couldn't read NFO file."
 
   return None
+                       
+if __name__ == '__main__':
+  print "Hello, world!"
+  path = sys.argv[1]
+  files = [os.path.join(path, file) for file in os.listdir(path)]
+  media = []
+  Scan(path[1:], files, media, [])
+  print "Media:", media, media[0].parts
